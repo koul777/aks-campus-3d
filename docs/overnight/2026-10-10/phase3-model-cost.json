@@ -1,0 +1,97 @@
+[
+  {
+    "id": "shiseubjae",
+    "bytes": 8073224,
+    "triangles": 83964
+  },
+  {
+    "id": "boinjae",
+    "bytes": 4689608,
+    "triangles": 48696
+  },
+  {
+    "id": "itaekjae",
+    "bytes": 2545284,
+    "triangles": 26328
+  },
+  {
+    "id": "munhyeong",
+    "bytes": 1472416,
+    "triangles": 15126
+  },
+  {
+    "id": "library",
+    "bytes": 1182108,
+    "triangles": 11910
+  },
+  {
+    "id": "unjung",
+    "bytes": 524692,
+    "triangles": 5190
+  },
+  {
+    "id": "graduate-school",
+    "bytes": 404900,
+    "triangles": 3920
+  },
+  {
+    "id": "main",
+    "bytes": 367060,
+    "triangles": 3526
+  },
+  {
+    "id": "hall",
+    "bytes": 329560,
+    "triangles": 3202
+  },
+  {
+    "id": "cafeteria",
+    "bytes": 261716,
+    "triangles": 2504
+  },
+  {
+    "id": "jangseogak",
+    "bytes": 212772,
+    "triangles": 1968
+  },
+  {
+    "id": "cheonggye-hakdang",
+    "bytes": 184860,
+    "triangles": 1780
+  },
+  {
+    "id": "hakuijeong",
+    "bytes": 139992,
+    "triangles": 1340
+  },
+  {
+    "id": "jinhyeon",
+    "bytes": 127180,
+    "triangles": 1126
+  },
+  {
+    "id": "gugeun",
+    "bytes": 117056,
+    "triangles": 1042
+  },
+  {
+    "id": "cheonggye",
+    "bytes": 111220,
+    "triangles": 982
+  },
+  {
+    "id": "east-pond",
+    "bytes": 82292,
+    "triangles": 812
+  },
+  {
+    "id": "gate",
+    "bytes": 86488,
+    "triangles": 614
+  },
+  {
+    "id": "parking",
+    "bytes": 23800,
+    "triangles": 114
+  }
+]

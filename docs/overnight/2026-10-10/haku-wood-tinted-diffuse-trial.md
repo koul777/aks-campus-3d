@@ -1,0 +1,13 @@
+# Haku warm tinted diffuse-only material trial
+
+2026-10-10. Opt-in only; default warm timber and compact geometry status unchanged.
+
+Enable `?diagnostics&wood=tinted`. `Scene.tsx` maps only this new query to `BuildModelOptions.hakuWoodTinted: true`. Model application is still restricted to Hakuijeong and meshes named `haku-exposed-wood`. Existing `wood=source` and `wood=normal` remain available with their previous material behavior.
+
+The tinted trial clones each original timber material, preserving its own warm colour, roughness 0.88 and metalness 0. It applies the unchanged downloaded AmbientCG Wood096 diffuse JPEG as the standard PBR colour map. Three.js multiplies the texture colour by the original material colour. The original long-axis cylinder/box UV mapping and estimated metre repeat are reused. No normal texture is loaded or applied in this mode. Materials sharing one original material still share one tinted clone; distinct original warm colours retain distinct clones.
+
+This is a material tint, with no asset pixel editing. Both downloaded source assets still match their manifest's SHA256 hashes. The diffuse is 914,353 bytes, SHA256 `fa6b603dda286865a82a93a483c341a975a7d3062dd0f291b57800f7ac4d1b66`. Source and license metadata remain `https://ambientcg.com/a/Wood096`, CC0-1.0, and `actualCampusScan: false`. Stock grain is not an institute timber scan or an identification of Haku's timber species. The tint may darken the diffuse; visual acceptance remains a same-camera rendered comparison, not a guarantee of source fidelity.
+
+`node scripts/verify-haku-wood-tinted.mjs` passes. It executes the current material/UV function with mock texture loading and checks: diffuse-only loading in tinted mode, absent normal map, original colours/roughness/metalness, preserved legacy source and normal modes, identical UV arrays across all modes, untouched non-wood material, shared-clone behavior, and source asset hashes against the existing manifest. Results: `artifacts/haku-wood-tinted/result.json`. `npx tsc --noEmit` passes.
+
+Changed files: `src/pavilion-model.ts`, material option/application in `src/building-model.ts`, and only the `wood=tinted` query plumbing in `src/Scene.tsx`. The verifier is `scripts/verify-haku-wood-tinted.mjs`. No focus/camera code, building data, source asset pixels, default material selection or compact default was changed. No build, dist mutation, browser or GPU work was performed by this implementation agent. Root rendered QA must decide whether the warm tinted grain improves the result without the source mode's washed colour or normal-only seams.

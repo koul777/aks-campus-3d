@@ -1,0 +1,25 @@
+{
+  "asset": "Wood096",
+  "source": "https://ambientcg.com/a/Wood096",
+  "archive": "https://ambientcg.com/get?file=Wood096_1K-JPG.zip",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://docs.ambientcg.com/license/",
+  "enabledByDefault": false,
+  "files": [
+    {
+      "role": "diffuse",
+      "path": "/materials/haku-wood096/Wood096_1K-JPG_Color.jpg",
+      "bytes": 914353,
+      "sha256": "fa6b603dda286865a82a93a483c341a975a7d3062dd0f291b57800f7ac4d1b66"
+    },
+    {
+      "role": "normalGL",
+      "path": "/materials/haku-wood096/Wood096_1K-JPG_NormalGL.jpg",
+      "bytes": 864486,
+      "sha256": "30e56cd5c8e7ec19545a0fe8b339f7311534071a3a9076d034d210ca8dad46f3"
+    }
+  ],
+  "totalBytes": 1778839,
+  "roughnessStrategy": "Use scalar0.88; original roughness retained in research only because all3 originals total2,408,164bytes.",
+  "originalsUnmodified": true
+}

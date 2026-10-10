@@ -1,0 +1,12 @@
+.git/
+.vercel/
+/.assay/
+artifacts/
+/references/
+node_modules/
+dist/
+public/cesium/
+*.tsbuildinfo
+.env
+.env.*
+*.log
