@@ -310,7 +310,12 @@ export default function App() {
             {status}
           </div>
           <p className="map-gesture">
-            드래그 이동 · 우클릭/휠 확대 · Ctrl+드래그 회전
+            <span className="gesture-desktop">
+              드래그 이동 · 우클릭/휠 확대 · Ctrl+드래그 회전
+            </span>
+            <span className="gesture-touch">
+              한 손가락 이동 · 두 손가락 확대·회전
+            </span>
           </p>
         </section>
         <aside className="facility-panel" ref={facilityPanel}>

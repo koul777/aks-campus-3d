@@ -104,6 +104,7 @@ try {
     viewport: { width: 320, height: 740 },
     isMobile: true,
     hasTouch: true,
+    deviceScaleFactor: 3,
     reducedMotion: "reduce",
   });
   const mobileErrors = [];
@@ -138,18 +139,75 @@ try {
     false,
   );
   assert.deepEqual(mobileErrors, []);
+  const mobileResolution = await mobile.evaluate(
+    () => window.__aksDiagnostics().renderResolution,
+  );
+  assert(mobileResolution.width >= mobileResolution.cssWidth * 1.99);
   await mobile.screenshot({ path: `${output}/mobile-recovery.png` });
   results.pages.push({
     name: "mobile-recovery",
     width: 320,
+    renderResolution: mobileResolution,
     errors: mobileErrors,
   });
   await mobile.close();
+
+  const moviePath = "/media/aks-campus-update-20261013.mp4";
+  const movie = await browser.newPage({
+    viewport: { width: 1280, height: 720 },
+  });
+  const movieResponse = await movie.request.get(`${base}${moviePath}`);
+  assert(movieResponse.ok(), "Published demo must be reachable");
+  const movieBytes = await movieResponse.body();
+  const movieSha = createHash("sha256").update(movieBytes).digest("hex");
+  assert.equal(
+    movieSha,
+    createHash("sha256")
+      .update(await readFile(`public${moviePath}`))
+      .digest("hex"),
+  );
+  await movie.setContent(
+    `<style>body{margin:0;background:#000}video{width:100vw;height:100vh}</style><video muted playsinline controls src="${base}${moviePath}"></video>`,
+  );
+  await movie.waitForFunction(
+    () => document.querySelector("video").readyState >= 2,
+  );
+  const metadata = await movie.locator("video").evaluate(async (video) => {
+    await video.play();
+    return {
+      duration: video.duration,
+      width: video.videoWidth,
+      height: video.videoHeight,
+    };
+  });
+  assert.equal(metadata.duration, 82);
+  assert.equal(metadata.width, 1920);
+  assert.equal(metadata.height, 1080);
+  await movie.waitForTimeout(1800);
+  assert(
+    await movie
+      .locator("video")
+      .evaluate((video) => video.currentTime > 1 && !video.error),
+  );
+  await movie.locator("video").evaluate((video) => {
+    video.pause();
+    video.currentTime = 73;
+  });
+  await movie.waitForFunction(() => !document.querySelector("video").seeking);
+  await movie.screenshot({ path: `${output}/video-mobile-comparison.png` });
+  results.media = {
+    url: `${base}${moviePath}`,
+    bytes: movieBytes.length,
+    sha256: movieSha,
+    ...metadata,
+  };
+  await movie.close();
   console.log(
     JSON.stringify({
       base,
       assetsVerified: results.assets.length,
       pages: results.pages,
+      media: results.media,
     }),
   );
 } finally {

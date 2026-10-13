@@ -4,7 +4,9 @@
 
 **[웹에서 보기](https://aks-campus-3d.vercel.app)** · [GitHub](https://github.com/koul777/aks-campus-3d) · [지도 자료 출처](https://aks-campus-3d.vercel.app/data/attribution.html)
 
-![연구원과 주변 주거·상가 건물의 3D 화면](docs/images/neighborhood-20261013.jpg)
+[![업데이트 시연영상 — 주변 건물·건축 마감·보행·교통](docs/images/update-demo-20261013.jpg)](https://aks-campus-3d.vercel.app/media/aks-campus-update-20261013.mp4)
+
+**[82초 업데이트 시연영상 보기 · 1080p MP4](https://aks-campus-3d.vercel.app/media/aks-campus-update-20261013.mp4)** — 같은 구도의 주변 건물 표시 전·후, 건물 디테일, 보행자, 광역버스·승용차, 조작, 모바일 화질 비교 순서입니다. 실제 배포 화면에 한글 설명을 넣었으며 모든 3D 장면은 회전 없는 고정 카메라입니다. 모바일 비교는 실제 브라우저 캡처입니다.
 
 ## 이번 업데이트 · 2026-10-13
 
@@ -17,8 +19,11 @@
 | 교통 | **승용차 16대 + 광역버스 4대**. 양방향 차로와 교내 동쪽 도로 |
 | 도로 표현 | 하오개로·교내 이동 경로에 지형을 따르는 노면·차선·차량 그림자. 폭과 도색은 시각화용 추정 |
 | 조작 | 재생·일시정지, 사람/교통/주변 건물 표시, 산책길·버스 추적, 주변 보기 |
+| 모바일 화질 | 고밀도 화면의 저해상도 렌더 오류 수정. 최대 2배 해상도, 화면 회전 대응, 시설명 겹침 완화·터치 안내 |
 
 주변 건물도 Blender에서 마감을 처리했습니다. 창문·창턱·발코니를 포함한 156동을 재질별 10개 메시로 묶고 Draco로 압축해 약 **2MB**의 GLB로 제공합니다. 나머지 연구원 시설은 기존 형상을 유지하며 Blender에서 배포용으로 패키징했습니다.
+
+![연구원과 주변 주거·상가 건물의 3D 화면](docs/images/neighborhood-20261013.jpg)
 
 19개 시설·주변 모델·9종 이동 자산을 미리 생성해 제공합니다. 전체 GLB는 약 **18.1MB**이며, 일반 접속에서는 모델을 브라우저에서 다시 생성하지 않습니다. 생성 코드는 편집·재생성과 복구용으로 남겨 두었습니다.
 
@@ -29,6 +34,9 @@
 - **일시정지**로 사람과 차량을 멈출 수 있습니다. 표시 레이어는 각각 끌 수 있습니다.
 - 지도 드래그로 이동, 휠·우클릭으로 확대, Ctrl+드래그로 회전합니다. 입체·위에서·회전·확대·전체 보기 버튼도 지원합니다.
 - 모바일에서는 동작 설정 패널을 접어 둡니다. `+`로 펼칠 수 있습니다. 운영체제의 동작 줄이기 설정이 켜져 있으면 시뮬레이션은 멈춘 상태로 시작합니다.
+- 모바일 시설명은 선택 시설·주요 건물을 우선 표시하며, 확대하면 더 많은 이름이 나타납니다. 고밀도 화면은 최대 2배 렌더 해상도를 사용합니다. 큰 화면에서는 CSS 1배 해상도를 하한으로 240만 픽셀 예산에 맞춰 조절합니다.
+
+![동일한 모바일 화면 조건에서의 개선 전후 — 건물·계단·시설명 선명도](docs/images/mobile-quality-20261013.png)
 
 <img src="docs/images/walkers-20261013.jpg" alt="본관 앞길의 보행자" width="49%"> <img src="docs/images/bus-20261013.jpg" alt="하오개로의 가상 광역버스" width="49%">
 
@@ -77,6 +85,7 @@ npm run build
 ```sh
 npm run test:browser
 npm run test:regressions
+node scripts/check-mobile-quality.mjs
 ```
 
 개발 서버(`5173`)가 실행 중이면 `npm run test:moving`으로 4종 보행자의 65개 자세에서 발 접합과 승용차의 실제 외곽 크기도 검사할 수 있습니다.
@@ -115,3 +124,5 @@ npm run test:models
 Vercel 프로젝트 `aks-campus-3d`는 `npm ci` → `npm run build` → `dist`를 사용합니다. 소스와 배포 설정은 이 저장소에 포함됩니다. `.env*`, 조사 원본 `references`, 검수 산출물 `artifacts`, `.vercel`, `node_modules`는 Git과 배포 업로드에서 제외합니다. 로컬 원본을 쓰는 과거 조사·비교 스크립트에는 원래 작업 자료가 필요합니다.
 
 배포 후 `node scripts/check-deployment.mjs`로 실제 주소의 모델·동작·모바일 오류 안내와 29개 GLB의 SHA-256을 이 체크아웃과 비교할 수 있습니다. 다른 주소는 `BASE_URL`로 지정합니다.
+
+시연영상은 `node scripts/record-update-demo.mjs` → `python scripts/encode-update-demo.py`로 재생성합니다. Chrome과 FFmpeg가 필요하며, 촬영 원본·카메라 검사·인코딩 근거는 `artifacts/upgrade-20261013/demo`에 저장됩니다. 보존한 모바일 개선 전후 이미지가 마지막 부분에 포함됩니다. `check-mobile-quality.mjs`의 `BEFORE_URL`·`BASE_URL`로 비교 대상을 지정할 수 있으며, 역사적 전후 이미지는 수정 전 배포에서 촬영한 원본을 사용합니다. 화면 설명은 촬영용 오버레이이며 서비스 UI를 변경하지 않습니다.

@@ -116,6 +116,7 @@ export default function Scene({
     demandAllowed.current = false;
     let cancelled = false;
     let viewer: Viewer | undefined;
+    let resizeObserver: ResizeObserver | undefined;
     const urls: string[] = [];
     const trialQuery = new URLSearchParams(location.search);
     const photoTrial =
@@ -194,7 +195,20 @@ export default function Scene({
           ? performance.now() - diagnostic.lastRenderAt
           : 0,
         globeTilesLoaded: viewer?.scene.globe.tilesLoaded,
+        renderResolution: viewer && {
+          devicePixelRatio: window.devicePixelRatio || 1,
+          cssWidth: viewer.canvas.clientWidth,
+          cssHeight: viewer.canvas.clientHeight,
+          width: viewer.canvas.width,
+          height: viewer.canvas.height,
+          resolutionScale: viewer.resolutionScale,
+          useBrowserRecommendedResolution:
+            viewer.useBrowserRecommendedResolution,
+        },
         modelCount: modelRefs.current.size,
+        visibleLabelCount: viewer?.entities.values.filter(
+          (entity) => entity.show,
+        ).length,
         life: lifeRef.current?.diagnostics(),
         models: [...modelRefs.current.entries()].map(([id, model]) => ({
           id,
@@ -432,8 +446,75 @@ export default function Scene({
           requestRenderMode: false,
           maximumRenderTimeChange: Infinity,
           shadows: true,
+          useBrowserRecommendedResolution: false,
         });
         viewerRef.current = viewer;
+        // Keep facility names legible on a narrow screen. Selected and major
+        // facilities take priority; zooming in reveals the remaining names.
+        viewer.scene.preRender.addEventListener(() => {
+          if (!viewer) return;
+          const compact = viewer.canvas.clientWidth <= 700;
+          const occupied: {
+            left: number;
+            right: number;
+            top: number;
+            bottom: number;
+          }[] = [];
+          const priority = (id: string) =>
+            id === focusTarget.current?.id
+              ? -2
+              : ["main", "library", "hall", "jangseogak", "gate"].includes(id)
+                ? -1
+                : 0;
+          const entities = [...viewer.entities.values].sort(
+            (a, b) => priority(a.id) - priority(b.id),
+          );
+          for (const entity of entities) {
+            let show = visibility.current.labels;
+            if (show && compact && entity.label && entity.position) {
+              const position = entity.position.getValue(
+                viewer.clock.currentTime,
+              );
+              const screen =
+                position &&
+                SceneTransforms.worldToWindowCoordinates(
+                  viewer.scene,
+                  position,
+                );
+              const text = String(
+                entity.label.text?.getValue(viewer.clock.currentTime) ?? "",
+              );
+              const halfWidth =
+                [...text].reduce(
+                  (sum, letter) => sum + (letter.charCodeAt(0) > 255 ? 14 : 8),
+                  8,
+                ) / 2;
+              if (!screen) show = false;
+              else {
+                const box = {
+                  left: screen.x - halfWidth,
+                  right: screen.x + halfWidth,
+                  top: screen.y - 22,
+                  bottom: screen.y + 4,
+                };
+                show =
+                  box.left >= 4 &&
+                  box.right <= viewer.canvas.clientWidth - 4 &&
+                  box.bottom >= 0 &&
+                  box.top <= viewer.canvas.clientHeight &&
+                  !occupied.some(
+                    (other) =>
+                      box.left < other.right &&
+                      box.right > other.left &&
+                      box.top < other.bottom &&
+                      box.bottom > other.top,
+                  );
+                if (show) occupied.push(box);
+              }
+            }
+            if (entity.show !== show) entity.show = show;
+          }
+        });
         viewer.shadowMap.size = 2048;
         viewer.shadowMap.maximumDistance = 1600;
         viewer.shadowMap.darkness = 0.35;
@@ -451,11 +532,31 @@ export default function Scene({
         );
         viewer.imageryLayers.addImageryProvider(imagery);
         viewer.scene.globe.depthTestAgainstTerrain = true;
-        viewer.scene.globe.maximumScreenSpaceError = 2;
-        viewer.resolutionScale = Math.min(
-          1,
-          1.5 / (window.devicePixelRatio || 1),
-        );
+        viewer.scene.globe.maximumScreenSpaceError = 1.5;
+        // Cesium otherwise ignores DPR. Dividing resolutionScale by DPR while
+        // leaving its default enabled rendered a DPR-3 phone at half CSS size.
+        // Preserve fine edges at up to 2x CSS resolution, with a pixel budget
+        // for large screens. Recalculate after rotation and panel resizing.
+        const updateResolution = () => {
+          if (!viewer || viewer.isDestroyed()) return;
+          const dpr = window.devicePixelRatio || 1;
+          const area = Math.max(
+            1,
+            viewer.canvas.clientWidth * viewer.canvas.clientHeight,
+          );
+          const ratio = Math.min(
+            dpr,
+            2,
+            Math.max(1, Math.sqrt(2_400_000 / area)),
+          );
+          const scale = ratio / dpr;
+          if (Math.abs(viewer.resolutionScale - scale) > 0.001)
+            viewer.resolutionScale = scale;
+          viewer.scene.requestRender();
+        };
+        updateResolution();
+        resizeObserver = new ResizeObserver(updateResolution);
+        resizeObserver.observe(container.current!);
         viewer.scene.screenSpaceCameraController.minimumZoomDistance = 2;
         viewer.scene.screenSpaceCameraController.maximumZoomDistance = 15000;
         imagery.errorEvent.addEventListener((error: unknown) => {
@@ -914,6 +1015,7 @@ export default function Scene({
     start();
     return () => {
       cancelled = true;
+      resizeObserver?.disconnect();
       lifeRef.current?.dispose();
       lifeRef.current = undefined;
       stopFocus.current?.();

@@ -17,6 +17,7 @@ try {
       viewport: { width: 390, height: 844 },
       isMobile: true,
       hasTouch: true,
+      deviceScaleFactor: 3,
       reducedMotion: "reduce",
     },
   ]) {
@@ -36,6 +37,22 @@ try {
     assert.equal(initial.life.surroundings, 156);
     assert.equal(initial.life.actors.length, 42);
     assert(initial.life.ready);
+    const resolution = initial.renderResolution;
+    assert(
+      resolution.width >= resolution.cssWidth,
+      "Canvas must not render below CSS resolution",
+    );
+    if (name === "mobile") {
+      assert.equal(resolution.devicePixelRatio, 3);
+      assert(
+        initial.visibleLabelCount > 0 && initial.visibleLabelCount < 19,
+        "Mobile overview labels should not overlap",
+      );
+      assert(
+        resolution.width >= resolution.cssWidth * 1.99,
+        "DPR-3 phones need a sharp 2x canvas",
+      );
+    }
     const loadedMs = Date.now() - started;
     await page.screenshot({ path: `${output}/${name}-initial.png` });
     if (await page.getByRole("button", { name: "동작 설정 펼치기" }).count())
@@ -105,6 +122,23 @@ try {
     );
     assert.equal(overflow, false);
     assert.deepEqual(errors, []);
+    if (name === "mobile") {
+      await page.setViewportSize({ width: 844, height: 390 });
+      await page.waitForTimeout(1200);
+      const landscape = await page.evaluate(
+        () => window.__aksDiagnostics().renderResolution,
+      );
+      assert(
+        landscape.width >= landscape.cssWidth * 1.99,
+        "Rotation must retain sharp resolution",
+      );
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+        false,
+      );
+    }
     results.push({
       name,
       loadedMs,

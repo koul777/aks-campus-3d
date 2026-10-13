@@ -320,6 +320,17 @@ button:disabled {
   color: #fff;
   text-shadow: 0 1px 5px black;
 }
+.gesture-touch {
+  display: none;
+}
+@media (pointer: coarse) {
+  .gesture-desktop {
+    display: none;
+  }
+  .gesture-touch {
+    display: inline;
+  }
+}
 .facility-panel {
   background: #f5f3ec;
   border-left: 1px solid #d3d9ca;
