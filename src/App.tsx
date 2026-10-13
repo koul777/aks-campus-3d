@@ -65,10 +65,10 @@ export default function App() {
   }, [worldStats.error]);
   useEffect(() => {
     if (!selected) return;
-    if (window.matchMedia('(max-width: 700px)').matches) {
-      mapRegion.current?.scrollIntoView({ block: 'start', behavior: 'auto' });
+    if (window.matchMedia("(max-width: 700px)").matches) {
+      mapRegion.current?.scrollIntoView({ block: "start", behavior: "auto" });
     } else {
-      facilityPanel.current?.scrollTo({ top: 0, behavior: 'auto' });
+      facilityPanel.current?.scrollTo({ top: 0, behavior: "auto" });
     }
   }, [selected]);
   useEffect(() => {

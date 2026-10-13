@@ -92,7 +92,7 @@ export async function generateRouteAudit() {
         dy = ahead.north - behind.north,
         len = Math.hypot(dx, dy) || 1;
       const width =
-        spec.kind === "bus" ? 3.1 : spec.kind === "car" ? 2.2 : 0.65,
+          spec.kind === "bus" ? 3.1 : spec.kind === "car" ? 2.2 : 0.65,
         length = spec.kind === "bus" ? 12.1 : spec.kind === "car" ? 4.8 : 0.9;
       samples.push({
         distance: d,
@@ -114,7 +114,14 @@ export async function generateRouteAudit() {
     }
     return { id: spec.id, kind: spec.kind, length: route.length, samples };
   });
-  return { obstacles, routes };
+  const roads = createRouteSpecs(data)
+    .filter((spec) => ["haogae-west", "campus-north"].includes(spec.id))
+    .map((spec) => ({
+      id: spec.id,
+      width: (spec.id === "haogae-west" ? 7.4 : 5.0) + 0.45,
+      points: spec.points,
+    }));
+  return { obstacles, routes, roads };
 }
 if (
   process.argv[1] &&

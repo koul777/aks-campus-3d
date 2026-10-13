@@ -34,6 +34,7 @@ import { getVisualGroundElevation } from "./terrain";
 import { loadSurroundingsAsset } from "./surroundings-asset";
 import type { ActorKind } from "./moving-models";
 import { loadMovingAssets } from "./moving-assets";
+import { createRoadSurfaces } from "./road-surfaces";
 
 export type LifeState = {
   surroundings: boolean;
@@ -94,6 +95,7 @@ export async function createCampusLife(
     lastFrame = performance.now(),
     lastTick = 0;
   let neighborhood: Model | undefined,
+    roads: Awaited<ReturnType<typeof createRoadSurfaces>> | undefined,
     following: Actor | undefined,
     removeUpdate: (() => void) | undefined;
   const models: Model[] = [],
@@ -112,6 +114,7 @@ export async function createCampusLife(
   const dispose = () => {
     disposed = true;
     removeUpdate?.();
+    roads?.dispose();
     canvas.removeEventListener("pointerdown", stopFollowing);
     canvas.removeEventListener("wheel", stopFollowing);
     canvas.removeEventListener("keydown", stopFollowing);
@@ -188,6 +191,7 @@ export async function createCampusLife(
       ...assets.map((a) => a.url).filter((url) => url.startsWith("blob:")),
     );
     const specs = createRouteSpecs(data);
+    roads = await createRoadSurfaces(viewer, specs, stopped);
     const routeDiagnostics: (Pick<
       RouteSpec,
       "id" | "name" | "kind" | "closed" | "lane" | "source"
@@ -292,7 +296,7 @@ export async function createCampusLife(
       actor.position = Cartesian3.fromDegrees(
         lon,
         lat,
-        actor.groundHeight + (actor.kind === "person" ? 0.022 : 0.06),
+        actor.groundHeight + (actor.kind === "person" ? 0.022 : 0.12),
         undefined,
         actor.position,
       );
@@ -379,7 +383,7 @@ export async function createCampusLife(
     return {
       dispose,
       stopFollowing,
-      isReady: () => models.every((m) => m.ready),
+      isReady: () => models.every((m) => m.ready) && !!roads?.isReady(),
       setState(next) {
         state = { ...next };
         neighborhood!.show = state.surroundings;
@@ -421,7 +425,9 @@ export async function createCampusLife(
       },
       diagnostics: () => ({
         ...counts,
-        ready: models.every((m) => m.ready),
+        ready: models.every((m) => m.ready) && !!roads?.isReady(),
+        roadSurfaces: roads?.details,
+        roadsReady: roads?.isReady(),
         state,
         elapsed,
         following: following?.id,
