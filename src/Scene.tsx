@@ -35,19 +35,25 @@ import {
   getFacilityGroundClearance,
   getVisualGroundElevation,
 } from "./terrain";
-import { createBuildingGlb } from "./building-model";
 import { landscapePlants } from "./data/landscape";
 import {
   createLandscapeInstancedGlb,
   TREE_SMALL_02_50K_DATUM,
 } from "./landscape-model";
 import type { Command } from "./App";
-import { createPrunedPlantGlb } from "./pruned-plant-model";
+import {
+  createCampusLife,
+  type CampusLife,
+  type LifeState,
+  type WorldStats,
+} from "./campus-life";
 
 type Props = {
   command: Command;
   labels: boolean;
   models: boolean;
+  life: LifeState;
+  onWorldStats: (stats: WorldStats) => void;
   onSelect: (id: string) => void;
   onStatus: (message: string) => void;
   onFailure: (message: string) => void;
@@ -75,6 +81,8 @@ export default function Scene({
   command,
   labels,
   models,
+  life,
+  onWorldStats,
   onSelect,
   onStatus,
   onFailure,
@@ -82,6 +90,9 @@ export default function Scene({
   const container = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const viewerRef = useRef<Viewer | undefined>(undefined);
+  const lifeRef = useRef<CampusLife | undefined>(undefined);
+  const lifeState = useRef(life);
+  lifeState.current = life;
   const modelRefs = useRef(new Map<string, Model>());
   const auxiliaryModels = useRef<Model[]>([]);
   const auxiliaryUrls = useRef(new Map<Model, string>());
@@ -99,8 +110,8 @@ export default function Scene({
   const stopFocus = useRef<(() => void) | undefined>(undefined);
   const visibility = useRef({ labels, models });
   visibility.current = { labels, models };
-  const callbacks = useRef({ onSelect, onStatus, onFailure });
-  callbacks.current = { onSelect, onStatus, onFailure };
+  const callbacks = useRef({ onSelect, onStatus, onFailure, onWorldStats });
+  callbacks.current = { onSelect, onStatus, onFailure, onWorldStats };
   useEffect(() => {
     demandAllowed.current = false;
     let cancelled = false;
@@ -184,6 +195,7 @@ export default function Scene({
           : 0,
         globeTilesLoaded: viewer?.scene.globe.tilesLoaded,
         modelCount: modelRefs.current.size,
+        life: lifeRef.current?.diagnostics(),
         models: [...modelRefs.current.entries()].map(([id, model]) => ({
           id,
           ready: model.ready,
@@ -271,10 +283,16 @@ export default function Scene({
           viewer.isDestroyed() ||
           ![heading, pitch, range].every(Number.isFinite) ||
           (scope !== "campus" && scope !== "selected")
-        ) return false;
+        )
+          return false;
         const selected = focusTarget.current;
-        const readyModels = [...modelRefs.current.values()].filter((model) => model.ready);
-        if ((scope === "selected" && !selected) || (scope === "campus" && !readyModels.length))
+        const readyModels = [...modelRefs.current.values()].filter(
+          (model) => model.ready,
+        );
+        if (
+          (scope === "selected" && !selected) ||
+          (scope === "campus" && !readyModels.length)
+        )
           return false;
         // Explicit demo poses take ownership from the terrain focus correction.
         stopFocus.current?.();
@@ -284,11 +302,15 @@ export default function Scene({
           CesiumMath.toRadians(pitch),
           Math.max(2, range),
         );
-        if (scope === "selected") viewer.camera.lookAt(selected!.position, offset);
-        else viewer.camera.viewBoundingSphere(
-          BoundingSphere.fromBoundingSpheres(readyModels.map((model) => model.boundingSphere)),
-          offset,
-        );
+        if (scope === "selected")
+          viewer.camera.lookAt(selected!.position, offset);
+        else
+          viewer.camera.viewBoundingSphere(
+            BoundingSphere.fromBoundingSpheres(
+              readyModels.map((model) => model.boundingSphere),
+            ),
+            offset,
+          );
         viewer.camera.lookAtTransform(Matrix4.IDENTITY);
         viewer.scene.requestRender();
         return true;
@@ -519,38 +541,58 @@ export default function Scene({
           const elevation = await getFacilityElevation(b);
           heights.current.set(b.id, elevation);
           diagnostic.stage = `${b.id}:glb-export`;
-          const groundProfile = await sampleBuildingGround(b);
-          const url = await createBuildingGlb(b, groundProfile, {
-            enablePhotoPatches: photoTrial,
-            enableMaterialTrial: materialTrial,
-            enableEnvironmentGlass: environmentGlassTrial,
-            neutralRoof: neutralRoofTrial,
-            continuousRoofUV: trialQuery.get("roofUV") !== "legacy",
-            photoGlazing: !["legacy", "environment"].includes(
-              trialQuery.get("glass") ?? "",
-            ),
-            hakuWoodTrial:
-              trialQuery.has("diagnostics") &&
-              trialQuery.get("wood") === "source",
-            hakuWoodNormalOnly:
-              trialQuery.has("diagnostics") && trialQuery.get("wood") === "normal",
-            hakuWoodTinted:
-              trialQuery.has("diagnostics") && trialQuery.get("wood") === "tinted",
-            hakuCurvedRoof:
-              trialQuery.get("hakuRoof") !== "legacy",
-            hakuGeometry:
-              trialQuery.get("hakuGeometry") === "legacy" ? undefined : "compact",
-            hakuPlaque: trialQuery.get("hakuPlaque") === "legacy" ? undefined : "photo",
-            softRoofPattern: trialQuery.get("roofPattern") !== "legacy",
-            graduateEntry:
-              trialQuery.get("graduateEntry") === "legacy" ? undefined : "open",
-            syntheticGlassPattern: trialQuery.get("glassPattern") === "legacy",
-            translucentWater:
-              trialQuery.has("diagnostics") &&
-              trialQuery.get("water") === "translucent",
-          });
+          const refined = ["main", "hall", "library", "jangseogak"].includes(
+            b.id,
+          );
+          const procedural =
+            trialQuery.get("models") === "procedural" ||
+            (refined && trialQuery.get("blender") === "legacy");
+          const staticUrl = procedural
+            ? undefined
+            : `/models/${refined ? "blender" : "campus"}/${b.id}.glb`;
+          const url =
+            staticUrl ??
+            (await (
+              await import("./building-model")
+            ).createBuildingGlb(b, await sampleBuildingGround(b), {
+              enablePhotoPatches: photoTrial,
+              architecturalDetail: trialQuery.get("detail") !== "legacy",
+              enableMaterialTrial: materialTrial,
+              enableEnvironmentGlass: environmentGlassTrial,
+              neutralRoof: neutralRoofTrial,
+              continuousRoofUV: trialQuery.get("roofUV") !== "legacy",
+              photoGlazing: !["legacy", "environment"].includes(
+                trialQuery.get("glass") ?? "",
+              ),
+              hakuWoodTrial:
+                trialQuery.has("diagnostics") &&
+                trialQuery.get("wood") === "source",
+              hakuWoodNormalOnly:
+                trialQuery.has("diagnostics") &&
+                trialQuery.get("wood") === "normal",
+              hakuWoodTinted:
+                trialQuery.has("diagnostics") &&
+                trialQuery.get("wood") === "tinted",
+              hakuCurvedRoof: trialQuery.get("hakuRoof") !== "legacy",
+              hakuGeometry:
+                trialQuery.get("hakuGeometry") === "legacy"
+                  ? undefined
+                  : "compact",
+              hakuPlaque:
+                trialQuery.get("hakuPlaque") === "legacy" ? undefined : "photo",
+              softRoofPattern: trialQuery.get("roofPattern") !== "legacy",
+              graduateEntry:
+                trialQuery.get("graduateEntry") === "legacy"
+                  ? undefined
+                  : "open",
+              syntheticGlassPattern:
+                trialQuery.get("glassPattern") === "legacy",
+              translucentWater:
+                trialQuery.has("diagnostics") &&
+                trialQuery.get("water") === "translucent",
+            }));
           modelUrls.current.set(b.id, url);
-          urls.push(url);
+          if (url.startsWith("blob:")) urls.push(url);
           if (cancelled) break;
           const position = Cartesian3.fromDegrees(
             b.anchor.longitude,
@@ -616,6 +658,37 @@ export default function Scene({
           viewer.scene.requestRender();
         }
         if (!cancelled) {
+          diagnostic.stage = "surroundings-and-campus-life";
+          callbacks.current.onStatus(
+            "주변 건물과 보행자·차량을 준비하고 있습니다…",
+          );
+          try {
+            const campusLife = await createCampusLife(
+              viewer,
+              originHeight,
+              lifeState.current,
+              (stats) => callbacks.current.onWorldStats(stats),
+              () => cancelled,
+            );
+            if (cancelled) {
+              campusLife.dispose();
+              return;
+            }
+            lifeRef.current = campusLife;
+            campusLife.setState(lifeState.current);
+          } catch (error) {
+            if (cancelled) return;
+            diagnostic.failures.push(`campus-life: ${String(error)}`);
+            callbacks.current.onWorldStats({
+              surroundings: 0,
+              people: 0,
+              cars: 0,
+              buses: 0,
+              loading: false,
+              error:
+                "주변 건물·시뮬레이션을 불러오지 못했습니다. 새로고침해 다시 시도해 주세요.",
+            });
+          }
           diagnostic.stage = "waiting-for-rendered-tiles-and-models";
           if (treeTrial) {
             const origin = Cartesian3.fromDegrees(
@@ -754,7 +827,9 @@ export default function Scene({
                 small: plant.id.includes("small"),
               });
             }
-            const url = await createPrunedPlantGlb(instances, clusteredTrial);
+            const url = await (
+              await import("./pruned-plant-model")
+            ).createPrunedPlantGlb(instances, clusteredTrial);
             if (url) {
               urls.push(url);
               const model = await Model.fromGltfAsync({
@@ -794,6 +869,7 @@ export default function Scene({
             const modelsReady =
               modelRefs.current.size === geographicBuildings.length &&
               [...modelRefs.current.values()].every((model) => model.ready) &&
+              (lifeRef.current?.isReady() ?? true) &&
               auxiliaryModels.current.every((model) => model.ready);
             settledFrames =
               scene.globe.tilesLoaded && modelsReady ? settledFrames + 1 : 0;
@@ -838,6 +914,8 @@ export default function Scene({
     start();
     return () => {
       cancelled = true;
+      lifeRef.current?.dispose();
+      lifeRef.current = undefined;
       stopFocus.current?.();
       viewerRef.current = undefined;
       modelRefs.current.clear();
@@ -863,6 +941,9 @@ export default function Scene({
     };
   }, []);
   useEffect(() => {
+    lifeRef.current?.setState(life);
+  }, [life]);
+  useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
     for (const entity of viewer.entities.values) entity.show = labels;
@@ -883,6 +964,15 @@ export default function Scene({
     stopFocus.current?.();
     stopFocus.current = undefined;
     focusTarget.current = undefined;
+    lifeRef.current?.stopFollowing();
+    if (
+      command.type === "people" ||
+      command.type === "traffic" ||
+      command.type === "neighborhood"
+    ) {
+      lifeRef.current?.view(command.type);
+      return;
+    }
     const b = geographicBuildings.find((b) => b.id === command.id);
     const origin = b?.anchor ?? campusOrigin;
     const height = b
@@ -1010,7 +1100,8 @@ export default function Scene({
       canvas.addEventListener("wheel", cancel);
       canvas.addEventListener("keydown", cancel);
       const frame = Transforms.eastNorthUpToFixedFrame(target);
-      const initialUp = distance * Math.tan(CesiumMath.toRadians(small ? 8 : 25));
+      const initialUp =
+        distance * Math.tan(CesiumMath.toRadians(small ? 8 : 25));
       const initialOffset = new Cartesian3(
         outward[0] * distance,
         outward[1] * distance,

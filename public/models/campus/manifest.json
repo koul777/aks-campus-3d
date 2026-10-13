@@ -1,0 +1,246 @@
+{
+  "generated": "2026-10-13",
+  "pipeline": "scripts/blender-pack-campus.py",
+  "models": [
+    {
+      "id": "boinjae",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 349612,
+      "inputBytes": 709432,
+      "inputSha256": "c7e1b1fb2b61749881d07a984cd02cc7bd4ebfdc162ed6020966c52f16cfd1a2",
+      "outputSha256": "17141ab415e6285db1b01ef0b1d7ce603e5e077227b161d22f230eec4825d293",
+      "anchor": {
+        "longitude": 127.0512125,
+        "latitude": 37.3921625
+      },
+      "groundHeight": 126.53125,
+      "groundClearance": 1,
+      "seconds": 0.78
+    },
+    {
+      "id": "cafeteria",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 541716,
+      "inputBytes": 697912,
+      "inputSha256": "adcd14c26dbc312b374e539758864963c50d57867e37238f27296f001619ce75",
+      "outputSha256": "0d18a4766a45fa0ae0c52feea7fee3cec84dfbe41f7b61c97151b93d7796ab34",
+      "anchor": {
+        "longitude": 127.0529455,
+        "latitude": 37.393282625
+      },
+      "groundHeight": 132.5546875,
+      "groundClearance": 1,
+      "seconds": 0.27
+    },
+    {
+      "id": "cheonggye-hakdang",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 432568,
+      "inputBytes": 730492,
+      "inputSha256": "74a97eff9ab70858cb6a82388cd981b91d7ec8412ebe3829ffc244bde1889fae",
+      "outputSha256": "c8e4496f030f7c11872676305a0dd1cc0931e43fdb5c2987396cfff11996aca2",
+      "anchor": {
+        "longitude": 127.05084375,
+        "latitude": 37.393299999999996
+      },
+      "groundHeight": 140,
+      "groundClearance": 1,
+      "seconds": 0.29
+    },
+    {
+      "id": "cheonggye",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 170296,
+      "inputBytes": 249304,
+      "inputSha256": "0927b0eae20e4543c044da906cb20c75838ae2bebf63ab7865213eaad104a4c2",
+      "outputSha256": "5a7374c7591f54ca642120b2497a7264b0cef7f3a1730c07b105d5f55c73e67d",
+      "anchor": {
+        "longitude": 127.0532741,
+        "latitude": 37.39419955
+      },
+      "groundHeight": 145.7578125,
+      "groundClearance": 1,
+      "seconds": 0.15
+    },
+    {
+      "id": "east-pond",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 31408,
+      "inputBytes": 98616,
+      "inputSha256": "c6dae024e95515af8b7de7a7b701783e0bea1626e0b5e14f63ddc1a8cb664489",
+      "outputSha256": "6af0dd3f96ef2c2ae51dabf496920a2025aa9928d9be5298a0721d6d6dddecc5",
+      "anchor": {
+        "longitude": 127.05368750000001,
+        "latitude": 37.39434375
+      },
+      "groundHeight": 144.4057538179389,
+      "groundClearance": 0,
+      "seconds": 0.09
+    },
+    {
+      "id": "gate",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 263032,
+      "inputBytes": 377196,
+      "inputSha256": "034eb46bac6463777cb778481f164f75b67b6fe66074ab21a4c847505572e36d",
+      "outputSha256": "6b3d79529daaa12e9742820747844ce121e91d31518bae67fd413a03159c13bd",
+      "anchor": {
+        "longitude": 127.0554792881,
+        "latitude": 37.3918263793
+      },
+      "groundHeight": 110.37109375,
+      "groundClearance": 1,
+      "seconds": 0.14
+    },
+    {
+      "id": "graduate-school",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 219840,
+      "inputBytes": 602564,
+      "inputSha256": "cbdf53096214479cabb752e92b72816918297b2c0d7b264d6d2886865d9e530e",
+      "outputSha256": "82e84f12b90877f2f92ef27788f4fa81b52bbc75dc35e170871e39c708ad8d7b",
+      "anchor": {
+        "longitude": 127.0505490667,
+        "latitude": 37.3928214667
+      },
+      "groundHeight": 138.69140625,
+      "groundClearance": 1,
+      "seconds": 0.28
+    },
+    {
+      "id": "gugeun",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 318892,
+      "inputBytes": 442232,
+      "inputSha256": "84218c4c4d106966af8513e1d7246397e1772708943aabdc0c26bb3a4501fa9d",
+      "outputSha256": "5d2266ac482ec00d51bfb8dff9aedd6991fd74007bf24663bfb29fce41b64554",
+      "anchor": {
+        "longitude": 127.05352005,
+        "latitude": 37.39390835
+      },
+      "groundHeight": 143.69140625,
+      "groundClearance": 1,
+      "seconds": 0.25
+    },
+    {
+      "id": "hakuijeong",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 5285948,
+      "inputBytes": 15196088,
+      "inputSha256": "a1db0c5bf36923fa994e1085af371795099c3119b15a693ddedce56bb6329cf2",
+      "outputSha256": "84feda3891350fb7e0c13cac96f4b2c5581d2a7818fe99c40e325554a6e4efff",
+      "anchor": {
+        "longitude": 127.0513,
+        "latitude": 37.393299999999996
+      },
+      "groundHeight": 136.01937069948286,
+      "groundClearance": 0,
+      "seconds": 3.55
+    },
+    {
+      "id": "itaekjae",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 155884,
+      "inputBytes": 853568,
+      "inputSha256": "f86ebbf305c799dc0d2d88abaa849db3fc9125ad49904545d0f18b228f361d16",
+      "outputSha256": "2e2254a479b1c0eebeb4b6565eafeca2b9dfc703b8567a6b412c71952b916163",
+      "anchor": {
+        "longitude": 127.050075,
+        "latitude": 37.393281249999994
+      },
+      "groundHeight": 139.22265625,
+      "groundClearance": 1,
+      "seconds": 0.45
+    },
+    {
+      "id": "jinhyeon",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 255076,
+      "inputBytes": 469272,
+      "inputSha256": "12fa9b70cb683d9c4ee5cdbd95609cd4c56b5c68fd8a01b2300fc70d6641f8a0",
+      "outputSha256": "ddc15f6f6a995cd017c75184a9a7ee829326d31860f216af2bcd900404da68b9",
+      "anchor": {
+        "longitude": 127.052989625,
+        "latitude": 37.39447855
+      },
+      "groundHeight": 149.37109375,
+      "groundClearance": 1,
+      "seconds": 0.4
+    },
+    {
+      "id": "munhyeong",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 438292,
+      "inputBytes": 1871028,
+      "inputSha256": "efee345416a1bfab319a5c385d1cbee96dd025d520ba7071f1e68f19c101bc02",
+      "outputSha256": "52a45e13b5c950553b07f53cd1380eaa0559bd1b5d84dadc9d2bd6b6fa6b8de9",
+      "anchor": {
+        "longitude": 127.05343584,
+        "latitude": 37.39210644
+      },
+      "groundHeight": 117.48828125,
+      "groundClearance": 1,
+      "seconds": 0.89
+    },
+    {
+      "id": "parking",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 14528,
+      "inputBytes": 45088,
+      "inputSha256": "1afcda66949f3a52951947f6cd7c8a8e8b222581c2f7e807d1c02a153a6d56ab",
+      "outputSha256": "456bafa833bf7dc169fe76ea93f12027cc905f2be256ce5336692fff5d9e8a48",
+      "anchor": {
+        "longitude": 127.05495625,
+        "latitude": 37.39226875
+      },
+      "groundHeight": 116.43491524863488,
+      "groundClearance": 0,
+      "seconds": 0.19
+    },
+    {
+      "id": "shiseubjae",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 375108,
+      "inputBytes": 978740,
+      "inputSha256": "f2d7e8a11304c0c71298ce4480993b412bdb2ed676ab0b6cdf30fba929fcaa23",
+      "outputSha256": "672557d7aa33f5d2a09cb1481cc0b36c8d38cd7c18e1be95b870f9aa1a664e89",
+      "anchor": {
+        "longitude": 127.0522516286,
+        "latitude": 37.3919008857
+      },
+      "groundHeight": 121.2890625,
+      "groundClearance": 1,
+      "seconds": 0.55
+    },
+    {
+      "id": "unjung",
+      "blender": "4.5.9 LTS",
+      "finish": "source geometry, triangulation and Draco packaging only",
+      "bytes": 213712,
+      "inputBytes": 660616,
+      "inputSha256": "0844562cb2e5d90394ad6e32479fec4b25e113a4b1167a5511a115df0ae1cc81",
+      "outputSha256": "8e62291b36a8ddf289f003f7777b775f558ba0f0c5db679b6509aae7af3d5d86",
+      "anchor": {
+        "longitude": 127.0526401833,
+        "latitude": 37.395021175
+      },
+      "groundHeight": 157.1796875,
+      "groundClearance": 1,
+      "seconds": 0.54
+    }
+  ]
+}

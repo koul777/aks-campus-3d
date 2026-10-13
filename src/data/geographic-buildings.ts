@@ -67,7 +67,7 @@ export type BuildingPart = {
   facadeBays?: number;
   porchDepth?: number;
   balconyWidth?: number;
-  entrance?: { width: number; doorwayWidth?:number; doorwayHeight?:number; depth: number; steps: number; rise: number;landing?:{start:number;depth:number;rise:number} };
+  entrance?: { width: number; doorwayWidth?:number; doorwayHeight?:number; depth: number; steps: number; rise: number;landing?:{start:number;depth:number;rise:number};sideCurbs?:{width:number;height:number} };
   plaque?: string;
 };
 export type GeographicBuilding = {
@@ -131,7 +131,7 @@ const facilities: GeographicBuilding[] = [
           {side:'south',center:0,width:6.3,bottom:5.7,height:1.1,panes:5},
           {side:'south',center:0,width:6.0,bottom:0.8,height:2.35,panes:4},
         ],
-        entrance:{width:11,depth:18,steps:28,rise:0.8,landing:{start:6,depth:2,rise:-1.2}}}),
+        entrance:{width:11,depth:18,steps:28,rise:0.8,landing:{start:6,depth:2,rise:-1.2},sideCurbs:{width:0.28,height:0.45}}}),
     ]),
   traced('hall','강당',127.0537554,37.393376475,'568039301','02',
     '2023 공식 동쪽 사진과 항공의 남쪽 면에서 각각 10열주·9베이를 확인했습니다. 동쪽 하부 남쪽 두 베이의 황동색 출입문과 팔각고리형 창격자를 구분했습니다. 열주·창·격자 반복수와 높이·후퇴 깊이는 사진비례 추정입니다.',[

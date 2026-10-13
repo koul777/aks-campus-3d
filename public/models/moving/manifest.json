@@ -1,0 +1,77 @@
+{
+  "generated": "2026-10-13",
+  "assets": [
+    {
+      "kind": "person",
+      "url": "/models/moving/person-0.glb",
+      "variant": 0,
+      "length": 0.5,
+      "bytes": 87680,
+      "sha256": "13a868cb98991802f95803412cfcde01a2ec0fcecc5ec228e3ddb44b6315b4f4"
+    },
+    {
+      "kind": "person",
+      "url": "/models/moving/person-1.glb",
+      "variant": 1,
+      "length": 0.5,
+      "bytes": 75724,
+      "sha256": "5e3be01d1a7e1ac1202216d645d4283e6ca89921ab03e2885d6d6efe9e564e1f"
+    },
+    {
+      "kind": "person",
+      "url": "/models/moving/person-2.glb",
+      "variant": 2,
+      "length": 0.5,
+      "bytes": 87680,
+      "sha256": "8a38bad6476dd9edd2da4767a4c43595bfc0ac31a01e7405521dd2d842fda267"
+    },
+    {
+      "kind": "person",
+      "url": "/models/moving/person-3.glb",
+      "variant": 3,
+      "length": 0.5,
+      "bytes": 75724,
+      "sha256": "f90a1ea6dddbb11cb1430d739031c4e91f8d13c2972d79708a0f29cfcca046f9"
+    },
+    {
+      "kind": "car",
+      "url": "/models/moving/car-0.glb",
+      "variant": 0,
+      "length": 4.5,
+      "bytes": 114908,
+      "sha256": "685630d9fc1865490aa2aa128dac2a951e2c05a95652b938ff2c85deea22ff11"
+    },
+    {
+      "kind": "car",
+      "url": "/models/moving/car-1.glb",
+      "variant": 1,
+      "length": 4.5,
+      "bytes": 114912,
+      "sha256": "887414c8d2bf01e8a21cc9f0fc6043950cb4161197749843342e2e2c09fa2be9"
+    },
+    {
+      "kind": "car",
+      "url": "/models/moving/car-2.glb",
+      "variant": 2,
+      "length": 4.5,
+      "bytes": 114912,
+      "sha256": "60fa2f21064d3616f9626a30d3359bf2d076f442a08c7f9fbd657b1609b320cd"
+    },
+    {
+      "kind": "car",
+      "url": "/models/moving/car-3.glb",
+      "variant": 3,
+      "length": 4.5,
+      "bytes": 114908,
+      "sha256": "59ec7dee5cc55b9ba261cf6c48f72aa789f68655e7c628ce4fad83d068c476df"
+    },
+    {
+      "kind": "bus",
+      "url": "/models/moving/bus-0.glb",
+      "variant": 0,
+      "length": 11.8,
+      "bytes": 173496,
+      "sha256": "27d75a32587dd1e831ffa7072d212c9aa8809075b52fad01412cc4ee4057e67c"
+    }
+  ]
+}

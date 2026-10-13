@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#e6e5df}canvas{display:block}</style></head><body><script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+const scene=new THREE.Scene();scene.background=new THREE.Color('#e6e5df');
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.append(renderer.domElement);
+const camera=new THREE.PerspectiveCamera(38,innerWidth/innerHeight,.05,100);camera.position.set(8,4.6,10);camera.lookAt(0,.7,0);
+scene.add(new THREE.HemisphereLight('#eff8ff','#756e61',2.5));const sun=new THREE.DirectionalLight('#fff8e5',3);sun.position.set(6,10,4);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-10;sun.shadow.camera.right=10;sun.shadow.camera.top=10;sun.shadow.camera.bottom=-10;scene.add(sun);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:'#d4d1c7',roughness:1}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const loader=new GLTFLoader(),results=[];
+for(let variant=0;variant<4;variant++){
+ const gltf=await loader.loadAsync(`/models/moving/person-${variant}.glb`),root=gltf.scene;
+ scene.add(root);root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+ const mixer=new THREE.AnimationMixer(root);mixer.clipAction(gltf.animations.find(a=>a.name==='walk')).play();
+ const minimums=[];
+ for(let step=0;step<=64;step++){
+  mixer.setTime(step/64*1.18);root.updateMatrixWorld(true);let min=Infinity;
+  root.traverse(o=>{if(o.isSkinnedMesh){o.skeleton.update();const point=new THREE.Vector3();for(let i=0;i<o.geometry.attributes.position.count;i++){o.getVertexPosition(i,point);point.applyMatrix4(o.matrixWorld);min=Math.min(min,point.y);}}});
+  minimums.push(min);
+ }
+ results.push({variant,minFoot:Math.min(...minimums),maxFoot:Math.max(...minimums),animation:gltf.animations[0].name});
+ mixer.setTime(variant*.21);root.position.set(-3+variant*.75,0,-1.9);root.rotation.y=Math.PI/5;root.updateMatrixWorld(true);
+}
+const car=await loader.loadAsync('/models/moving/car-0.glb');car.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});car.scene.position.x=.5;scene.add(car.scene);
+window.qa={results,carBounds:new THREE.Box3().setFromObject(car.scene)};renderer.render(scene,camera);
+</script></body></html>

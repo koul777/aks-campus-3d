@@ -4,6 +4,7 @@ import { addHakuCurvedRoof } from "./haku-roof-model";
 import { addHakuPhotoPlaque } from "./haku-plaque";
 import { addHakuSteppedApproach } from "./haku-access-model";
 import { hakuRoofProfileTrial } from "./data/haku-roof-profile";
+import { architecturalUv, createArchitecturalMaterial } from './architectural-detail';
 import {
   BoxGeometry,
   CylinderGeometry,
@@ -49,6 +50,7 @@ let softRoofPatternTrial = false;
 let syntheticGlassPattern = false;
 let translucentWaterTrial = false;
 let hakuCurvedRoofTrial = false;
+let architecturalDetail = true;
 export type BuildModelOptions = {
   enablePhotoPatches?: boolean;
   enableMaterialTrial?: boolean;
@@ -66,6 +68,7 @@ export type BuildModelOptions = {
   graduateEntry?: "open";
   syntheticGlassPattern?: boolean;
   translucentWater?: boolean;
+  architecturalDetail?: boolean;
 };
 const material = (color: string, metalness = 0) => {
   const key = `${color}/${metalness}`;
@@ -102,6 +105,12 @@ const material = (color: string, metalness = 0) => {
   }
   return result;
 };
+function facadeMaterial(color:string,kind:'plaster'|'stone'='plaster') {
+  const key=`architectural/${kind}/${color}`;
+  let result=materialCache.get(key);
+  if(!result){result=createArchitecturalMaterial(color,kind);materialCache.set(key,result);}
+  return result;
+}
 
 // Photo-proportioned brick modules; not a scan or a measured masonry drawing.
 function brickMaterial(color: string) {
@@ -1076,6 +1085,24 @@ function addFacade(
         ground + h / 2,
         1 + landing.start + landing.depth / 2,
       );
+    }
+    if (architecturalDetail && part.entrance.sideCurbs) {
+      const curb=part.entrance.sideCurbs;
+      const ground=(entryGroundHeight??part.baseHeight)-part.baseHeight;
+      const profile=landing
+        ? [[1,rise],[1+landing.start,landing.rise],[1+landing.start+landing.depth,landing.rise],[1+depth,ground]]
+        : [[1,rise],[1+depth,ground]];
+      for(const sideSign of [-1,1])for(let segment=0;segment<profile.length-1;segment++){
+        const [z0,y0]=profile[segment],[z1,y1]=profile[segment+1];
+        const x0=sideSign*width/2+(sideSign<0?-curb.width:0),x1=x0+curb.width;
+        const vertices=[
+          [x0,ground,z0],[x1,ground,z0],[x1,y0+curb.height,z0],[x0,y0+curb.height,z0],
+          [x0,ground,z1],[x1,ground,z1],[x1,y1+curb.height,z1],[x0,y1+curb.height,z1],
+        ];
+        const faces=[0,2,1,0,3,2,4,6,7,4,5,6,0,5,4,0,1,5,3,6,2,3,7,6,0,7,3,0,4,7,1,6,5,1,2,6];
+        const geometry=new BufferGeometry();geometry.setAttribute('position',new Float32BufferAttribute(faces.flatMap(index=>vertices[index]),3));geometry.computeVertexNormals();architecturalUv(geometry);
+        faceMesh(new Mesh(geometry,facadeMaterial('#d3d0c7','stone')),0,0,0);
+      }
     }
     if (!part.glazedOpenings?.some((opening) => opening.side === side)) {
       const doorwayWidth =
@@ -2169,6 +2196,10 @@ function addVerifiedDetails(group: Group, part: BuildingPart) {
       frame.position.set(0, height, 0.1 - recess);
       front.add(frame);
     }
+    if(architecturalDetail){
+      const sill=new Mesh(new BoxGeometry(opening.width+0.24,0.095,0.31),facadeMaterial('#cecfc5','stone'));
+      sill.position.set(0,-0.04,0.16-recess);front.add(sill);
+    }
     group.add(front);
   }
   if (part.balconyStacks) {
@@ -2705,6 +2736,7 @@ export async function createBuildingGlb(
   softRoofPatternTrial = options.softRoofPattern ?? true;
   syntheticGlassPattern = options.syntheticGlassPattern ?? false;
   translucentWaterTrial = options.translucentWater ?? false;
+  architecturalDetail = options.architecturalDetail ?? true;
   hakuCurvedRoofTrial = options.hakuCurvedRoof === true && building.id === hakuRoofProfileTrial.buildingId;
   const group = new Group();
   environmentGlassTrial = enableEnvironmentGlass && building.id === "main";
@@ -2899,7 +2931,8 @@ export async function createBuildingGlb(
       const skirt = new BufferGeometry();
       skirt.setAttribute("position", new Float32BufferAttribute(vertices, 3));
       skirt.computeVertexNormals();
-      group.add(new Mesh(skirt, material("#9b978c")));
+      if(architecturalDetail)architecturalUv(skirt);
+      group.add(new Mesh(skirt, architecturalDetail?facadeMaterial('#9b978c','stone'):material("#9b978c")));
     }
     if (part.pillarProfile) {
       const minE = Math.min(...part.footprint.map((p) => p[0])),
@@ -2963,12 +2996,13 @@ export async function createBuildingGlb(
     geometry.rotateX(-Math.PI / 2);
     geometry.translate(0, part.baseHeight, 0);
     if (part.wallSurface === "brick") metricBrickUv(geometry);
+    else if(architecturalDetail)architecturalUv(geometry);
     const bodyMesh = new Mesh(
       geometry,
       trialWallMaterial ??
         (part.wallSurface === "brick"
           ? brickMaterial(part.wallColor)
-          : material(part.wallColor)),
+          : architecturalDetail?facadeMaterial(part.wallColor,building.id==='jangseogak'?'stone':'plaster'):material(part.wallColor)),
     );
     bodyMesh.userData.photoPartId = part.id;
     bodyMesh.userData.photoSurface = "cladding";
@@ -3095,6 +3129,7 @@ export async function createBuildingGlb(
         }
       }
       if (object.material.name.startsWith("brick-")) metricBrickUv(geometry);
+      if (object.material.name.startsWith('architectural-')) architecturalUv(geometry);
       const positions = geometry.getAttribute("position");
       if (
         (object.material.map || object.material.normalMap) &&
