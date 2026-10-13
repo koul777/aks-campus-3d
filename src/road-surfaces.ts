@@ -118,9 +118,10 @@ export async function createRoadSurfaces(
       const publicRoad = id === "haogae-west",
         width = publicRoad ? 7.4 : 5.0;
       details.push({ id, width, length: route.length });
-      shoulders.push(
-        ribbon(route, width + 0.45, "#a3a096", 0, 0, route.length, 0.078),
-      );
+      for (const side of [-1, 1])
+        shoulders.push(
+          ribbon(route, 0.225, "#a3a096", side * (width / 2 + 0.1125), 0, route.length, 0.09),
+        );
       asphalt.push(ribbon(route, width, "#606763", 0, 0, route.length, 0.09));
       for (const side of [-1, 1])
         markings.push(
@@ -168,7 +169,7 @@ export async function createRoadSurfaces(
           translucent: false,
           closed: false,
         }),
-        shadows: ShadowMode.ENABLED,
+        shadows: ShadowMode.RECEIVE_ONLY,
         allowPicking: false,
         asynchronous: false,
       });
